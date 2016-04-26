@@ -159,7 +159,7 @@ function product_form($form, &$form_state, $product = NULL)
     '#options' => array(''=>'Sub Categoria'),
     '#prefix' => '<div id="sub">',
     '#suffix' => '</div>',
-    '#default_value' => '',
+    '#default_value' => isset($product->sub_categoria_id) ? $product->sub_categoria_id : null,
     '#validated' => true,
   );
   
@@ -204,6 +204,23 @@ function product_form($form, &$form_state, $product = NULL)
 
   return $form;
 }
+/*Intento para obtener el valor actual de la categoría*/
+function get_value($sub_cat,$form, $form_state){
+  $val = taxonomy_get_parents($sub_cat);
+  $opti = array();
+  $terms = taxonomy_get_tree(2,$val[1]->tid);
+
+  foreach ($terms as $key => $value) {
+
+     $opti[$value->tid] = $value->name;
+  }
+
+  return $form['sub_categoria_id']['#options'] = $opti;
+
+}
+/*
+ * Traer las subcategorías o hijos de la categoría q escoja el usuario
+ */
 function sandbox_ajax_category($form, $form_state) {
   $catid = $form_state['values']['categoria_id'];
 
@@ -211,7 +228,7 @@ function sandbox_ajax_category($form, $form_state) {
   $terms = taxonomy_get_tree(2,$catid);
 
   foreach ($terms as $key => $value) {
-    $options[$key] = $value->name;
+    $options[$value->tid] = $value->name;
   }
   $form['sub_categoria_id']['#options'] = $options;
 
@@ -359,7 +376,7 @@ class ProductEntityController extends EntityAPIController {
     // Our additions to the $build render array.
     $build['description'] = array(
       '#type' => 'markup',
-      '#markup' => $entity->sku,
+      '#markup' => 'Sku:'.$entity->sku,
       '#prefix' => '<div class="product-sku">',
       '#suffix' => '</div>',
     );

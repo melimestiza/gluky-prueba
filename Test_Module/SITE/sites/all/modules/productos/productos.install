@@ -34,6 +34,12 @@ function productos_schema() {
         'length' => 11,
         'not null' => FALSE,
       ),
+      'sub_categoria_id' => array(
+        'description' => 'Sub Categoría del producto',
+        'type' => 'int',
+        'length' => 11,
+        'not null' => FALSE,
+      ),
       'programa_id' => array(
         'description' => 'Categoría del producto',
         'type' => 'int',
