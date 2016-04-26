@@ -148,21 +148,19 @@ function product_form($form, &$form_state, $product = NULL)
     '#ajax' => array(
       'event'=>'change',
       'callback' =>'sandbox_ajax_category',
-      'wrapper' => 'city-wrapper',
+      'wrapper' => 'sub',
     ),
   );
-   $form['product_form']['wrapper'] = array(
-    '#prefix' => '<div id="city-wrapper">',
-    '#suffix' => '</div>',
-  );
-  $options = array('- Select subcategoria -');
-  if (isset($form_state['values']['categoria_id'])) {
-    $options = taxonomy_list($form_state['values']['categoria_id']);
-  }
+
   $form['sub_categoria_id'] = array(
-    '#title' => t('City'),
+    '#title' => t('Sub Categoria'),
     '#type' => 'select',
-    '#options' => $options,
+    '#required' => TRUE,
+    '#options' => array(''=>'Sub Categoria'),
+    '#prefix' => '<div id="sub">',
+    '#suffix' => '</div>',
+    '#default_value' => '',
+    '#validated' => true,
   );
   
   $form['programa_id'] = array (
@@ -207,8 +205,17 @@ function product_form($form, &$form_state, $product = NULL)
   return $form;
 }
 function sandbox_ajax_category($form, $form_state) {
-  // Return the dropdown list including the wrapper
-  return $form['product_form']['wrapper'];
+  $catid = $form_state['values']['categoria_id'];
+
+  $options = array(''=> 'Categoria');
+  $terms = taxonomy_get_tree(2,$catid);
+
+  foreach ($terms as $key => $value) {
+    $options[$key] = $value->name;
+  }
+  $form['sub_categoria_id']['#options'] = $options;
+
+  return $form['sub_categoria_id'];
 }
 
 function taxonomy_list($name)
@@ -253,7 +260,7 @@ function product_form_validate($form, &$form_state)
      ->propertyCondition('sku', $form_state['values']['sku'])
      ->execute();
 
-    if (isset($result->ordered_results) || isset($form_state['product']->id)) {
+    if (isset($result->ordered_results) && !isset($form_state['product']->id)) {
       form_set_error('sku', t('Producto repetido'));
     }
 
